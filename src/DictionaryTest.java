@@ -14,7 +14,6 @@ public class DictionaryTest {
 		for (int i = 0; i < 26; i++)
 			for (int j = 0; j < 26; j++) {
 				StringBuffer s = new StringBuffer();
-				
 				s.append((char) ((int) 'A' + i));
 				s.append((char) ((int) 'A' + j));
 				entries[i * 26 + j] = s.toString();
@@ -23,7 +22,8 @@ public class DictionaryTest {
 
 	public static void main(String[] args) {
 		BSTDictionary<String, SortableString> dict1 = new BSTDictionary<String, SortableString>();
-		//AVLDictionary<String, SortableString> dict2 = new AVLDictionary<String, SortableString>();
+		AVLDictionary<String, SortableString> dict2 = new AVLDictionary<String, SortableString>();
+
 		// Insert lots of entries
 		fill();
 		for (int i = 0; i < 26 * 26; i++) {
@@ -33,19 +33,18 @@ public class DictionaryTest {
 			} while (entries[e] == null);
 
 			dict1.insert(new SortableString(entries[e]), entries[e]);
-			//dict2.insert(new SortableString(entries[e]), entries[e]);
+			dict2.insert(new SortableString(entries[e]), entries[e]);
 			entries[e] = null;
 		}
 
 		// print the two dictionaries
-		System.out.println("BEFORE DELETING:");
 		dict1.printTree();
-		//dict2.printTree();
+		dict2.printTree();
 		// print the depth
 		System.out.println("The initial BST tree has a maximum depth of "
 				+ dict1.depth());
-		//System.out.println("The initial AVL tree has a maximum depth of "
-		//		+ dict2.depth());
+		System.out.println("The initial AVL tree has a maximum depth of "
+				+ dict2.depth());
 
 		// Delete half the entries
 		fill();
@@ -56,23 +55,17 @@ public class DictionaryTest {
 			} while (entries[e] == null);
 
 			dict1.delete(new SortableString(entries[e]));
-			//dict2.delete(new SortableString(entries[e]));
+			dict2.delete(new SortableString(entries[e]));
 		}
-		
-		System.out.println("\nAFTER DELETING:");
-		dict1.printTree();
 
 		System.out
 				.println("After deletes, the BST tree has a maximum depth of "
 						+ dict1.depth());
-		//System.out
-				//.println("After deletes, the AVL tree has a maximum depth of "
-						//+ dict2.depth());
+		System.out
+				.println("After deletes, the AVL tree has a maximum depth of "
+						+ dict2.depth());
 
 		// Add a quarter the entries
-		
-		//dict1.printTree();
-		/**
 		fill();
 		for (int i = 0; i < 6 * 26; i++) {
 			int e;
@@ -81,15 +74,15 @@ public class DictionaryTest {
 			} while (entries[e] == null);
 
 			dict1.insert(new SortableString(entries[e]), entries[e]);
-			//dict2.insert(new SortableString(entries[e]), entries[e]);
+			dict2.insert(new SortableString(entries[e]), entries[e]);
 		}
 
 		System.out
 				.println("After insertions, the BST tree has a maximum depth of "
 						+ dict1.depth());
-		//System.out
-		//		.println("After insertions, the AVL tree has a maximum depth of "
-		//				+ dict2.depth());
+		System.out
+				.println("After insertions, the AVL tree has a maximum depth of "
+						+ dict2.depth());
 
 		// Search for a few random entries
 		fill();
@@ -105,13 +98,11 @@ public class DictionaryTest {
 			} else {
 				System.out.print("Found in Dict1, ");
 			}
-			//if (dict2.search(new SortableString(entries[e])) == null) {
-			//	System.out.println("not found in Dict2.");
-			//} else {
-			//	System.out.println("found in Dict2.");
-			//}
-		
-			 */
-		//}
+			if (dict2.search(new SortableString(entries[e])) == null) {
+				System.out.println("not found in Dict2.");
+			} else {
+				System.out.println("found in Dict2.");
+			}
+		}
 	} // main method
 } /* DictionaryTest class */
