@@ -15,6 +15,7 @@ public class BSTDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 	public BSTDictionary() {
 		this(null);
 	}
+	
 	/**
 	 * Constructor with a non-default root node.
 	 * @param root the non-default root value.
