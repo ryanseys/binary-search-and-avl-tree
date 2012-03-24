@@ -31,26 +31,21 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 		}
 
 		/** 
-		 * Insert a key-value pair into the binary search tree.
+		 * Insert a key-value pair into the AVL tree.
 		 * Uses the recursive solution as a helper method.
 		 */
 		public void insert(K key, E element) {
-			int var;
 			// there are no items yet in the AVL tree
 			if(root == null) {
 				root = new AVLNode<E, K>(key, element, null, null, BALANCED);
-				System.out.println("root " + root.getKey() + " set: it's balance is: " + root.getBalance());
 			}
 			// there are items in the AVL tree
 			// so we must find where to put the item. (by key)
 			else {
-				//System.out.println("Inserting... key: " + key + " element: " + element);
-				var = insertBelow(root, key, element);
-				root.setBalance(root.getBalance()+var);
-				System.out.println(key + " inserted: root balance is: " + root.getBalance());
+				insertBelow(root, key, element);
 			}
 		}
-
+		
 		/**
 		 * A recursive solution to inserting a node below a specific node.
 		 * 
@@ -58,68 +53,38 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 		 * @param key the key value of the new node to be inserted
 		 * @param element the element value of the node to be inserted
 		 */
-		public int insertBelow(AVLNode<E, K> node, K key, E element) {
-			int var;
+		public void insertBelow(AVLNode<E, K> node, K key, E element) {
 			//if they are equal
 			if(key.compareTo(node.getKey()) == 0) {
-				return 0; //cannot have duplicates
+				//cannot have duplicates
 			}
-			
 			//else if key is greater than the node's key
 			else if(key.compareTo(node.getKey()) > 0) {
 				//greater goes to the right
-				System.out.println(key + " inserting to the right of " + node.getKey());
 				if(node.getRight() == null) {
-					node.setRight(new AVLNode<E, K>(key, element, null, null, 2));
-					if(node.getBalance() == MORELEFT) {
-						node.setBalance(BALANCED);
-						System.out.println(node.getKey() + " 2balance = " + node.getBalance());
-						return 0; //increase balance by 1 on the previous node
-					}
-					else {
-						node.setBalance(MORERIGHT);
-						System.out.println(node.getKey() + " 3balance = " + node.getBalance());
-						return 0; //increase balance by 1 on the previous node
-					}
+					node.setRight(new AVLNode<E, K>(key, element, null, null, BALANCED));
+					node.setBalance(node.getBalance()+1);
 				}
 				else {
-					var = insertBelow(node.getRight(), key, element);
-					node.setBalance(node.getBalance()+var);
-					System.out.println(node.getRight().getKey() + " 4balance now = " + node.getRight().getBalance());
-					//System.out.println(key + " inserting to the right of " + node.getRight().getKey());
-					return 1; //increase balance by 1 on the previous node
+					insertBelow(node.getRight(), key, element);
+					node.setBalance(node.getBalance()+1);
 				}
 			}
-			
 			//else if key is less than the node's key
 			else if(key.compareTo(node.getKey()) < 0) {
 				//less goes to the left
-				System.out.println(key + " inserting to the left of " + node.getKey());
 				if(node.getLeft() == null) {
-					node.setLeft(new AVLNode<E, K>(key, element, null, null, 2));
-					if(node.getBalance() == MORERIGHT) {
-						node.setBalance(BALANCED);
-						System.out.println(node.getKey() + " 5balance = " + node.getBalance());
-						return 0;
-					}
-					else {
-						node.setBalance(MORELEFT);
-						System.out.println(node.getKey() + " 6balance = " + node.getBalance());
-						return 0;
-					}
+					node.setLeft(new AVLNode<E, K>(key, element, null, null, BALANCED));
+					node.setBalance(node.getBalance()-1);
 				}
 				else {
-					var = insertBelow(node.getLeft(), key, element);
-					node.setBalance(node.getBalance()+var);
-					System.out.println(node.getLeft().getKey() + " 7balance now = " + node.getLeft().getBalance());
-					//System.out.println(key + " inserting to the left of " + node.getLeft().getKey());
-					return -1; //reduce balance by 1 on the previous node
+					insertBelow(node.getLeft(), key, element);
+					node.setBalance(node.getBalance()-1);
 				}
 			}
 			else {
 				// this case should never be reached.
 				System.out.println("Something seriously went wrong. ERROR #2");
-				return -1;
 			}
 		}
 
