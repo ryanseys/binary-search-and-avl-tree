@@ -46,14 +46,7 @@ public class BSTDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 	 * @param key The key we wish to delete from this tree.
 	 */
 	public void delete(K key) {
-		//if the keys are equal to root
-		//if(key.compareTo(root.getKey()) == 0) {
-		//System.out.println("Want to delete key: " + key + ". Root's key is: " + root.getKey());
-		//root = null;
-		//}
-		//System.out.println("deleting " + key);
 		this.root = deleteRecursive(root, key);
-		//System.out.println("Done deleting " + key);
 	}
 
 	/**
@@ -181,7 +174,6 @@ public class BSTDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 		// there are items in the binary search tree
 		// so we must find where to put the item. (by key)
 		else {
-			//System.out.println("Inserting... key: " + key + " element: " + element);
 			insertBelow(root, key, element);
 		}
 	}
