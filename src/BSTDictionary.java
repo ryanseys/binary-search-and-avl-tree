@@ -1,18 +1,19 @@
 
-/** This class represents a binary search tree dictionary.
+/** 
+ * This class represents a binary search tree dictionary.
  * The binary search tree is always balanced.
  * All children that are LEFT of the parent are LESS than the parent.
  * All children that are RIGHT of the parent are MORE than the parent.
  * 
- * @author Ryan
- * 
+ * @author Ryan Seys
  */
 public class BSTDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 	BSTNode<E, K> root;
 	//constructor
 	public BSTDictionary() {
-		root = null;
+		this(null);
 	}
+	//constructor with a non-default root node.
 	public BSTDictionary(BSTNode<E, K> root) {
 		this.root = root;
 	}
