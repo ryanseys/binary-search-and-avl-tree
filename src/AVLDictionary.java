@@ -1,11 +1,12 @@
 
-/**
+/** Represents a AVL Tree. It is self-balancing.
  * @author Ryan (100817604)
  * @param <E>
  *
  */
 public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 		
+		//This is a self-balancing tree.
 		public AVLDictionary() {
 			
 		}
