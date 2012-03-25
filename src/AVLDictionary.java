@@ -183,6 +183,11 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 			else {
 				insertBelow(node.getRight(), key, element);
 				node.setBalance(node.getBalance()+1);
+				/*
+				 * check balance of node here, if the balance is greater than 3 (more than 1 more than right)
+				 * then we have to check the right node to see if it is a RIGHT LEFT case (right node balance <= MORELEFT)
+				 * or a RIGHT RIGHT case (right node balance >= MORERIGHT) then do the appropriate rotation.
+				 */
 			}
 		}
 		//else if key is less than the node's key
@@ -195,6 +200,11 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 			else {
 				insertBelow(node.getLeft(), key, element);
 				node.setBalance(node.getBalance()-1);
+				/*
+				 * check balance of node here, if the balance is less than 1 (more on left)
+				 * then we have to check the left node to see if it is a LEFT LEFT case (left node balance <= MORELEFT)
+				 * or a LEFT RIGHT case (left node balance >= MORERIGHT) then do the appropriate rotation.
+				 */
 			}
 		}
 		else {
