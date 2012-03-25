@@ -250,7 +250,6 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 	 * @return a new rotated node.
 	 */
 	public AVLNode<E, K> rotateRIGHTLEFT(AVLNode<E, K> node) {
-		/* Not yet implemented */
 		AVLNode<E, K> rightLeftSubtree = node.getRight().getLeft();
 		AVLNode<E, K> bottomRightSubtree = rightLeftSubtree.getRight();
 		AVLNode<E, K> rightNode = node.getRight();
@@ -268,8 +267,14 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 	 * @return a new rotated node.
 	 */
 	public AVLNode<E, K> rotateLEFTRIGHT(AVLNode<E, K> node) {
-		/* Not yet implemented */
-		return null;
+		AVLNode<E, K> leftRightSubtree = node.getLeft().getRight();
+		AVLNode<E, K> bottomRightSubtree = leftRightSubtree.getLeft();
+		AVLNode<E, K> leftNode = node.getLeft();
+		leftNode.setRight(bottomRightSubtree);
+		leftRightSubtree.setLeft(leftNode);
+		node.setLeft(leftRightSubtree);
+		node = rotateLEFTLEFT(node);
+		return node;
 	}
 
 	/** 
