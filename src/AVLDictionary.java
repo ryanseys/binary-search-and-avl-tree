@@ -212,6 +212,58 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 			System.out.println("Something seriously went wrong. ERROR #2");
 		}
 	}
+	
+	/**
+	 * Rotate method for the RIGHTRIGHT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateRIGHTRIGHT(AVLNode<E, K> node) {
+		AVLNode<E, K> rightLeftSubtree = node.getRight().getLeft();
+		AVLNode<E, K> backupNode = node;
+		backupNode.setRight(rightLeftSubtree);
+		AVLNode<E, K> newRight = node.getRight();
+		newRight.setLeft(backupNode);
+		return newRight;
+	}
+	
+	/** 
+	 * Rotate method for the LEFTLEFT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateLEFTLEFT(AVLNode<E, K> node) {
+		AVLNode<E, K> leftRightSubtree = node.getLeft().getRight();
+		AVLNode<E, K> backupNode = node;
+		backupNode.setLeft(leftRightSubtree);
+		AVLNode<E, K> newLeft = node.getLeft();
+		newLeft.setRight(backupNode);
+		return newLeft;
+	}
+	
+	/** 
+	 * Rotate method for the RIGHTLEFT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateRIGHTLEFT(AVLNode<E, K> node) {
+		/* Not yet implemented */
+		return null;
+	}
+	
+	/** 
+	 * Rotate method for the LEFTRIGHT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateLEFTRIGHT(AVLNode<E, K> node) {
+		/* Not yet implemented */
+		return null;
+	}
 
 	/** 
 	 * Recursive counter to count the depth of the tree's node.
