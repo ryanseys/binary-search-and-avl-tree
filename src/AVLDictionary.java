@@ -9,7 +9,7 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
     private static final int BALANCED = 2;
     private static final int MORELEFT = 1;
     private static final int MORERIGHT = 3;
-    public boolean debugging = false;
+    public boolean debugging = true;
 
     /**
      * Constructor for the AVL Tree.
@@ -95,7 +95,8 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
         else if(key.compareTo(node.getKey()) < 0) {
             if(node.getLeft() != null) {
                 //keep looking but to the left of this node
-                node.left = deleteRecursive(node.getLeft(), key);
+                node.setLeft(copyNode(deleteRecursive(node.getLeft(), key)));
+                node = balance(copyNode(node)); //rebalance tree from this node
                 return node;
             }
         }
@@ -103,7 +104,8 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
         else {
             if(node.getRight() != null) {
                 //keep looking but to the right of this node
-                node.right = deleteRecursive(node.getRight(), key);
+                node.setRight(copyNode(deleteRecursive(node.getRight(), key)));
+                node = balance(copyNode(node)); //rebalance tree from this node
                 return node;
             }
         }
@@ -141,7 +143,16 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
     public void inorder(AVLNode<E,K> node) {
         if(node != null) {
             inorder(node.getLeft()); //get the left keys first
-            if(debugging) System.out.println("key: " + node.getKey().toString() + " element: " + node.getElement().toString() + " balance: " + node.getBalance());
+            System.out.println("key: " + node.getKey().toString() + " element: " + node.getElement().toString() + " balance: " + node.getBalance());
+            if(node.getLeft() != null) {
+            	System.out.println("left of " + node.getKey() + " is " + node.getLeft().getKey() + " with balance = " + node.getLeft().getBalance());
+            }
+            else System.out.println("left of " + node.getKey() + " is null");
+            
+            if(node.getRight() != null) {
+            	System.out.println("right of " + node.getKey() + " is " + node.getRight().getKey() + " with balance = " + node.getRight().getBalance());
+            }
+            else System.out.println("right of " + node.getKey() + " is null");
             inorder(node.getRight()); //thing get the right keys.
         }
     }
@@ -171,189 +182,165 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
      * @param element the element value of the node to be inserted
      */
     public AVLNode<E, K> insertBelow(AVLNode<E, K> node, K key, E element) {
-        //if they are equal
-        if(key.compareTo(node.getKey()) == 0) {
-            //cannot have duplicates
-        }
-        //else if key is greater than the node's key
-        else if(key.compareTo(node.getKey()) > 0) {
-            //greater goes to the right
-            if(node.getRight() == null) {
-            	if(debugging) System.out.println(key + " inserting to the right of " + node.getKey());
-                node.setRight(new AVLNode<E, K>(key, element, null, null, BALANCED));
-                if(debugging) System.out.println(key + " inserted to the right of " + node.getKey());
-                node.setBalance(node.getBalance()+1);
-                //System.out.println(node.getKey() + " has a balance of " + node.getBalance() + " now.");
-                return node;
-            }
-            else {
-                //System.out.println(key + " inserting to the right of " + node.getKey());
-                node.setRight(insertBelow(node.getRight(), key, element));
-                //System.out.println(key + " inserted to the right of " + node.getKey());
-                node.setBalance(node.getBalance()+1);
-                //System.out.println(node.getKey() + " balance = " + node.getBalance());
-                /*
-                 * check balance of node here, if the balance is greater than 3 (more than 1 more than right)
-                 * then we have to check the right node to see if it is a RIGHT LEFT case (right node balance <= MORELEFT)
-                 * or a RIGHT RIGHT case (right node balance >= MORERIGHT) then do the appropriate rotation.
-                 */
-                if(debugging) System.out.println("checking if " + node.getKey() + " needs to be balanced");
-                if((node.getRight() != null) && (node.getRight().getBalance() != BALANCED) && (node.getBalance() > MORERIGHT)) {
-                	if(debugging) System.out.println(node.getKey() + " is out of balance! It is more right!");
-                    if(node.getRight().getBalance() >= MORERIGHT) {
-                        if(debugging) System.out.println("Rotating RIGHTRIGHT because balance at " + node.getKey() + " = " + node.getBalance());
-                        node = rotateRIGHTRIGHT(node);
-                    }
-                    else {
-                    	if(debugging) System.out.println("Rotating RIGHTLEFT because balance at " + node.getKey() + " = " + node.getBalance());
-                        if(node.getRight().getLeft() != null) { //this gets rid of the nullPointerException.
-                        	node = (rotateRIGHTLEFT(node));
-                        }
-                        else if(debugging) System.out.println("node wasn't changed because something screwed up and the right left node was null");
-                    }
-                }
-                else if(debugging) System.out.println("nope " + node.getKey() + " does not need to be balanced");
-                return node;
-            }
-        }
-        //else if key is less than the node's key
-        else if(key.compareTo(node.getKey()) < 0) {
-            //less goes to the left
-            if(node.getLeft() == null) {
-            	if(debugging) System.out.println(key + " inserting to the left of " + node.getKey());
-                node.setLeft(new AVLNode<E, K>(key, element, null, null, BALANCED));
-                if(debugging) System.out.println(key + " inserted to the left of " + node.getKey());
-                node.setBalance(node.getBalance()-1);
-                if(debugging) System.out.println(node.getKey() + " balance = " + node.getBalance());
-                return node;
-            }
-            else {
-            	if(debugging) System.out.println(key + " inserting to the left of " + node.getKey());
-                node.setLeft(insertBelow(node.getLeft(), key, element));
-                if(debugging) System.out.println(key + " inserted to the left of " + node.getKey());
-                node.setBalance(node.getBalance()-1);
-                if(debugging) System.out.println(node.getKey() + " balance = " + node.getBalance());
-                /*
-                 * check balance of node here, if the balance is less than 1 (more on left)
-                 * then we have to check the left node to see if it is a LEFT LEFT case (left node balance <= MORELEFT)
-                 * or a LEFT RIGHT case (left node balance >= MORERIGHT) then do the appropriate rotation.
-                 */
-                if(debugging) System.out.println("checking if " + node.getKey() + " needs to be balanced");
-                if(debugging) System.out.println(node.getKey() + " has a left node " +  node.getLeft());
-                if((node.getLeft() != null) && (node.getLeft().getBalance() != BALANCED) && (node.getBalance() < MORELEFT)) { //more left
-                	if(debugging) System.out.println(node.getKey() + " is out of balance! It is more left!");
-                    
-                    if(node.getLeft().getBalance() <= MORELEFT) {
-                        if(debugging) System.out.println("Rotating LEFTLEFT because balance at " + node.getKey() + " = " + node.getBalance());
-                        node = (rotateLEFTLEFT(node));
-                    }
-                    else {
-                    	if(debugging) System.out.println("Rotating LEFTRIGHT because balance at " + node.getKey() + " = " + node.getBalance());
-                        if(node.getLeft().getRight() != null) {
-                        	node = (rotateLEFTRIGHT(node));
-                        }
-                        else {
-                        	if(debugging) System.out.println("Was supossed to LEFTRIGHT on " + node.getKey() + " but the left-right node was null");
-                       }
-                    }
-                }
-                else if(debugging) System.out.println("nope " + node.getKey() + " does not need to be balanced");
-                return node;
-            }
-        }
-        else {
-            // this case should never be reached.
-            System.out.println("Something seriously went wrong. ERROR #2");
-        }
-        return node;
-    }
+    	if(node == null) {
+    		return new AVLNode<E, K>(key, element, null, null, 2);
+    	}
+    	else if(key.compareTo(node.getKey()) == 0) {
+    		return node; // they are equal.
+    	}
+    	else if(key.compareTo(node.getKey()) < 0) {
+    		//key is less than
+    		if(node.getLeft() == null) {
+    			//there is no node to insert it into
+    			node.setLeft(new AVLNode<E, K>(key, element, null, null, 2));
+    		}
+    		else {
+    			//insert it into this node
+    			node.setLeft(copyNode(insertBelow(copyNode(node.getLeft()), key, element)));
+    		}
+    		node.setBalance(node.getBalance()-1);
+    	}
+    	else if(key.compareTo(node.getKey()) > 0) {
+    		//key is greater than
+    		if(node.getRight() == null) {
+    			//there is no node to insert it into
+    			node.setRight(new AVLNode<E, K>(key, element, null, null, 2));
+    		}
+    		else {
+    			node.setRight(copyNode(insertBelow(copyNode(node.getRight()), key, element)));
+    		}
+    		node.setBalance(node.getBalance()+1);
+    	}
+    	node = balance(node);
+    	return node;
+}
     
-    /**
-     * Rotate method for the RIGHTRIGHT case.
-     * 
-     * @param node the node which we need to perform the rotate on.
-     * @return a new rotated node.
-     */
-    public AVLNode<E, K> rotateRIGHTRIGHT(AVLNode<E, K> node) {
-    	if(debugging) System.out.println("Rotating RIGHTRIGHT with node " + node.getKey());
-        AVLNode<E, K> rightLeftSubtree = copyNode(node.getRight().getLeft());
-        AVLNode<E, K> backupNode = copyNode(node);
-        backupNode.setRight(rightLeftSubtree);
-        backupNode.setBalance(BALANCED);
-        AVLNode<E, K> newRight = copyNode(node.getRight());
-        newRight.setLeft(backupNode);
-        newRight.setBalance(BALANCED);
-        //System.out.println("Rotated: root= " + newRight.getKey() + ":" + newRight.getBalance() + " left= " + newRight.getLeft().getKey() + ":" + newRight.getLeft().getBalance() + " right= " + newRight.getRight().getKey() + ":" + newRight.getRight().getBalance()); 
-        
-        return newRight;
-    }
-    
-    public AVLNode<E, K> copyNode(AVLNode<E, K>  node) {
-        if(node != null) {
-            return new AVLNode<E, K>(node.getKey(), node.getElement(), node.getLeft(), node.getRight(), node.getBalance());
-        }
-        else return null;
-    }
-    
-    /** 
-     * Rotate method for the LEFTLEFT case.
-     * 
-     * @param node the node which we need to perform the rotate on.
-     * @return a new rotated node.
-     */
-    public AVLNode<E, K> rotateLEFTLEFT(AVLNode<E, K> node) {
-    	if(debugging) System.out.println("Rotating LeftLeft with node " + node.getKey());
-        AVLNode<E, K> leftRightSubtree = copyNode(node.getLeft().getRight());
-        if(leftRightSubtree != null) leftRightSubtree.setBalance(BALANCED);
-        AVLNode<E, K> backupNode = copyNode(node);
-        backupNode.setLeft(leftRightSubtree);
-        backupNode.setBalance(BALANCED);
-        AVLNode<E, K> newLeft = copyNode(node.getLeft());
-        newLeft.setRight(backupNode);
-        newLeft.setBalance(BALANCED);
-        //System.out.println("Rotated: root= " + newLeft.getKey() + ":" + newLeft.getBalance() + " left= " + newLeft.getLeft() + ":" + newLeft.getLeft().getBalance() + " right= " + newLeft.getRight().getKey() + ":" + newLeft.getRight().getBalance()); 
-        
-        return newLeft;
-    }
-    
-    /** 
-     * Rotate method for the RIGHTLEFT case.
-     * 
-     * @param node the node which we need to perform the rotate on.
-     * @return a new rotated node.
-     */
-    public AVLNode<E, K> rotateRIGHTLEFT(AVLNode<E, K> node) {
-    	if(debugging) System.out.println("Rotating RightLeft with node " + node.getKey());
-        AVLNode<E, K> rightLeftSubtree = copyNode(node.getRight().getLeft());
-        if(debugging) System.out.println("rightLeftSubtree = " + rightLeftSubtree);
-        AVLNode<E, K> bottomRightSubtree = copyNode(rightLeftSubtree.getRight());
-        AVLNode<E, K> rightNode = copyNode(node.getRight());
-        rightNode.setLeft(bottomRightSubtree);
-        rightLeftSubtree.setRight(rightNode);
-        node.setRight(rightLeftSubtree);
-        node = rotateRIGHTRIGHT(node);
-        return node;
-    }
-    
-    /** 
-     * Rotate method for the LEFTRIGHT case.
-     * 
-     * @param node the node which we need to perform the rotate on.
-     * @return a new rotated node.
-     */
-    public AVLNode<E, K> rotateLEFTRIGHT(AVLNode<E, K> node) {
-    	if(debugging) System.out.println("Rotating LeftRight with node " + node.getKey());
-        AVLNode<E, K> leftRightSubtree = copyNode(node.getLeft().getRight());
-        if(debugging) System.out.println("leftRightSubtree = " + leftRightSubtree);
-        AVLNode<E, K> bottomRightSubtree = copyNode(leftRightSubtree.getLeft());
-        AVLNode<E, K> leftNode = copyNode(node.getLeft());
-        leftNode.setRight(bottomRightSubtree);
-        leftRightSubtree.setLeft(leftNode);
-        node.setLeft(leftRightSubtree);
-        node = rotateLEFTLEFT(node);
-        if(debugging) System.out.println("Rotated: root= " + node.getKey() + " left= " + node.getLeft().getKey() + " right= " + node.getRight().getKey()); 
-        return node;
-    }
+	/**
+	 * Balances the node using rotations if required.
+	 * Returns the balanced node.
+	 */
+	public AVLNode<E, K> balance(AVLNode<E, K> node) {
+		int balanceFactor = node.getBalance();
+		if(balanceFactor > MORERIGHT) {
+			//need to do a right rotate
+			AVLNode<E, K> rightNode = copyNode(node.getRight());
+			if(rightNode == null) return node;
+			if(rightNode.getBalance() == MORELEFT) {
+				//right-left rotate
+				node = rotateRIGHTLEFT(copyNode(node));
+				node = rotateRIGHTRIGHT(copyNode(node));
+				node.setBalance(2);
+			}
+			else if (rightNode.getBalance() >= MORERIGHT){
+				//right-right rotate
+				node = rotateRIGHTRIGHT(copyNode(node));
+				node.setBalance(2);
+			}
+		}
+		else if(balanceFactor < MORELEFT) {
+			//need to do a left rotate
+			AVLNode<E, K> leftNode = copyNode(node.getLeft());
+			if(leftNode == null) return node;
+			if (leftNode.getBalance() == MORERIGHT) {
+				//left-right rotate
+				node = rotateLEFTRIGHT(copyNode(node));
+				node = rotateLEFTLEFT(copyNode(node));
+				node.setBalance(2);
+			}
+			else if(leftNode.getBalance() <= MORELEFT) {
+				//left-left rotate
+				node = rotateLEFTLEFT(copyNode(node));
+				node.setBalance(2);
+			}
+		}
+		return copyNode(node);
+	}
+	
+	/** 
+	 * Rotate method for the LEFT-LEFT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateLEFTLEFT(AVLNode<E, K> node) {
+		AVLNode<E, K> newCenter = copyNode(node.getLeft());
+		AVLNode<E, K> newRight = copyNode(node);
+		newRight.setLeft(copyNode(newCenter.getRight()));
+		newRight.setBalance(2);
+		newCenter.setRight(copyNode(newRight));
+		newCenter.setBalance(2);
+		return newCenter;
+	}
+
+	/** 
+	* Rotate method for the LEFT-RIGHT case.
+	* 
+	* @param node the node which we need to perform the rotate on.
+	* @return a new rotated node.
+	*/
+	public AVLNode<E, K> rotateLEFTRIGHT(AVLNode<E, K> node) {
+		AVLNode<E, K> newTop = copyNode(node);
+		AVLNode<E, K> newCenter = copyNode(node.getLeft().getRight());
+		AVLNode<E, K> newBottom = copyNode(node.getLeft());
+		if(newCenter == null) return node;
+		newBottom.setRight(copyNode(newCenter.getLeft()));
+		newBottom.setBalance(2);
+		newCenter.setLeft(copyNode(newBottom));
+		newCenter.setBalance(1);
+		newTop.setLeft(copyNode(newCenter));
+		newTop.setBalance(0);
+		return newTop;
+	}
+
+	/**
+	 * Rotate method for the RIGHTRIGHT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateRIGHTRIGHT(AVLNode<E, K> node) {
+		AVLNode<E, K> newCenter = copyNode(node.getRight());
+		AVLNode<E, K> newLeft = copyNode(node);
+		if(newCenter == null) return node;
+		newLeft.setRight(copyNode(newCenter.getLeft()));
+		newLeft.setBalance(2);
+		newCenter.setLeft(copyNode(newLeft));
+		newCenter.setBalance(2);
+		return newCenter;
+	}
+	
+	/** 
+	 * Rotate method for the RIGHT-LEFT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateRIGHTLEFT(AVLNode<E, K> node) {
+		AVLNode<E, K> newTop = copyNode(node);
+		AVLNode<E, K> newCenter = copyNode(node.getRight().getLeft());
+		AVLNode<E, K> newBottom = copyNode(node.getRight());
+		if(newCenter == null) return node;
+		newBottom.setLeft(copyNode(newCenter.getRight()));
+		newBottom.setBalance(2);
+		newCenter.setRight(copyNode(newBottom));
+		newCenter.setBalance(3);
+		newTop.setRight(copyNode(newCenter));
+		newTop.setBalance(4);
+		return newTop;
+	}
+	    
+	/**
+	 * Copies a node to a new node.
+	 * 
+	 * @param node the node to copy
+	 * @return the copied node.
+	 */
+	public AVLNode<E, K> copyNode(AVLNode<E, K>  node) {
+	    if(node != null) {
+	        return new AVLNode<E, K>(node.getKey(), node.getElement(), node.getLeft(), node.getRight(), node.getBalance());
+	    }
+	    else return null;
+	}
 
     /** 
      * Recursive counter to count the depth of the tree's node.
@@ -368,6 +355,16 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
             return Math.max(postorder_depth(node.getLeft(), current_depth+1), postorder_depth(node.getRight(), current_depth+1));
         }
         else return current_depth;
+    }
+    
+    /**
+     * Recursively counts the depth of the tree.
+     */
+    int depth_recurse(AVLNode<E, K> node) {
+    	if(node != null) {
+    		return Math.max(depth_recurse(node.getRight()), depth_recurse(node.getLeft())) + 1;
+    	}
+    	else return 0;
     }
 
     /**

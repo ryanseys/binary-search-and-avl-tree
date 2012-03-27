@@ -24,85 +24,28 @@ public class DictionaryTest {
 		BSTDictionary<String, SortableString> dict1 = new BSTDictionary<String, SortableString>();
 		AVLDictionary<String, SortableString> dict2 = new AVLDictionary<String, SortableString>();
 
-		// Insert lots of entries
-		fill();
-		for (int i = 0; i < 26 * 26; i++) {
-			int e;
-			do {
-				e = (int) (Math.random() * (26 * 26));
-			} while (entries[e] == null);
-
-			dict1.insert(new SortableString(entries[e]), entries[e]);
-			dict2.insert(new SortableString(entries[e]), entries[e]);
-			entries[e] = null;
+		//String[] st = {"AA","BB","AC","AG","AI","AJ","BE","BI","AR","AS","AV","BJ","AK","AM","AP","AQ","AZ","BA"};
+		//String[] st = {"AA","BB","AC","AG","AI","AJ"};
+		String[] st = {"AA", "BB", "CC", "BC", "ZZ", "DZ", "OO"};
+		for(int w = 0; w<st.length;w++){
+			dict1.insert(new SortableString(st[w]), st[w]);
+			dict2.insert(new SortableString(st[w]), st[w]);
+			
 		}
 
-		// print the two dictionaries
-		//dict1.printTree();
+
+
+System.out.println("\nIn-order traversal of BST nodes after insertion: ");
+		dict1.printTree();
+
+System.out.println("\nIn-order traversal of AVL nodes after insertion: ");
 		dict2.printTree();
+		
 		// print the depth
-		System.out.println("The initial BST tree has a maximum depth of "
+		
+		System.out.println("The initial BST tree has a maxi nmum depth of "
 				+ dict1.depth());
 		System.out.println("The initial AVL tree has a maximum depth of "
 				+ dict2.depth());
-
-		// Delete half the entries
-		fill();
-		for (int i = 0; i < 13 * 26; i++) {
-			int e;
-			do {
-				e = (int) (Math.random() * (26 * 26));
-			} while (entries[e] == null);
-
-			dict1.delete(new SortableString(entries[e]));
-			dict2.delete(new SortableString(entries[e]));
-		}
-
-		System.out
-				.println("After deletes, the BST tree has a maximum depth of "
-						+ dict1.depth());
-		System.out
-				.println("After deletes, the AVL tree has a maximum depth of "
-						+ dict2.depth());
-
-		// Add a quarter the entries
-		fill();
-		for (int i = 0; i < 6 * 26; i++) {
-			int e;
-			do {
-				e = (int) (Math.random() * (26 * 26));
-			} while (entries[e] == null);
-
-			dict1.insert(new SortableString(entries[e]), entries[e]);
-			dict2.insert(new SortableString(entries[e]), entries[e]);
-		}
-
-		System.out
-				.println("After insertions, the BST tree has a maximum depth of "
-						+ dict1.depth());
-		System.out
-				.println("After insertions, the AVL tree has a maximum depth of "
-						+ dict2.depth());
-
-		// Search for a few random entries
-		fill();
-		for (int i = 0; i < 6; i++) {
-			int e;
-			do {
-				e = (int) (Math.random() * (26 * 26));
-			} while (entries[e] == null);
-
-			System.out.print("Searching for " + entries[e] + ": ");
-			if (dict1.search(new SortableString(entries[e])) == null) {
-				System.out.print("Not found in Dict1, ");
-			} else {
-				System.out.print("Found in Dict1, ");
-			}
-			if (dict2.search(new SortableString(entries[e])) == null) {
-				System.out.println("not found in Dict2.");
-			} else {
-				System.out.println("found in Dict2.");
-			}
-		}
 	} // main method
 } /* DictionaryTest class */
