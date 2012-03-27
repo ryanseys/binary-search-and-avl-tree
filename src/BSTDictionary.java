@@ -234,7 +234,8 @@ public class BSTDictionary<E, K extends Sortable> implements Dictionary<E, K> {
 	 * to print in sorted order, we traverse and print the tree "inorder".
 	 */
 	public void printTree() {
-		System.out.println("Printing...");
+		//print the tree by calling the recursive algo.
+		System.out.println("\nPrinting BSTree...");
 		inorder(root);
 	}
 

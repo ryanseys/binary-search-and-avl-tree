@@ -1,5 +1,8 @@
-
-/** Represents a AVL Tree. It is self-balancing.
+/** 
+ * Represents a AVL Tree. It is self-balancing.
+ * It uses rotation methods to self balance. 
+ * It also includes functionality for printing,
+ * as well as searching, inserting and deleting.
  * 
  * @author Ryan Seys
  */
@@ -15,7 +18,7 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
      * Constructor for the AVL Tree.
      */
     public AVLDictionary() {
-        this(null);
+        this(null); //calls the other constructor.
     }
 
     /**
@@ -23,17 +26,74 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
      * @param root the non-default root value.
      */
     public AVLDictionary(AVLNode<E, K> root) {
+    	//simply set the root to the passed parameter.
         this.root = root;
     }
+
+    /**
+	 * Balances the node using rotations if required.
+	 * Returns the balanced node.
+	 */
+	public AVLNode<E, K> balance(AVLNode<E, K> node) {
+		int balanceFactor = node.getBalance();
+		if(balanceFactor > MORERIGHT) {
+			//need to do a right rotate
+			AVLNode<E, K> rightNode = copyNode(node.getRight());
+			if(rightNode == null) return node;
+			if(rightNode.getBalance() == MORELEFT) {
+				//right-left rotate
+				node = rotateRIGHTLEFT(copyNode(node));
+				node = rotateRIGHTRIGHT(copyNode(node));
+				node.setBalance(2); //set it to be balanced.
+			}
+			else if (rightNode.getBalance() >= MORERIGHT){
+				//right-right rotate
+				node = rotateRIGHTRIGHT(copyNode(node));
+				node.setBalance(2); //set it to be balanced.
+			}
+		}
+		else if(balanceFactor < MORELEFT) {
+			//need to do a left rotate
+			AVLNode<E, K> leftNode = copyNode(node.getLeft());
+			if(leftNode == null) return node;
+			if (leftNode.getBalance() == MORERIGHT) {
+				//left-right rotate
+				node = rotateLEFTRIGHT(copyNode(node));
+				node = rotateLEFTLEFT(copyNode(node));
+				node.setBalance(2); //set it to be balanced.
+			}
+			else if(leftNode.getBalance() <= MORELEFT) {
+				//left-left rotate
+				node = rotateLEFTLEFT(copyNode(node));
+				node.setBalance(2); //set it to be balanced.
+			}
+		}
+		return copyNode(node);
+	}
+
+    /**
+	 * Copies a node to a new node.
+	 * 
+	 * @param node the node to copy
+	 * @return the copied node.
+	 */
+	public AVLNode<E, K> copyNode(AVLNode<E, K>  node) {
+		//simply calls the new constructor.
+	    if(node != null) {
+	        return new AVLNode<E, K>(node.getKey(), node.getElement(), node.getLeft(), node.getRight(), node.getBalance());
+	    }
+	    else return null;
+	}
 
     /**
      * Delete an entry with key passed as the parameter.
      * @param key The key we wish to delete from this tree.
      */
     public void delete(K key) {
+    	//calls the recursive delete recursive
         this.root = deleteRecursive(root, key);
     }
-
+    
     /**
      * Recursive solution to deleting a double node. More details
      * are prevalent beside where this method is called.
@@ -87,9 +147,6 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
                 replacementNode.setLeft(backupLeft); //replace the left nodes as the regular left nodes
                 return replacementNode; //return the new least "greater" node.
             }
-            else {
-                return node;
-            }
         }
         //if the key is still less than the node we are at...
         else if(key.compareTo(node.getKey()) < 0) {
@@ -97,7 +154,6 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
                 //keep looking but to the left of this node
                 node.setLeft(copyNode(deleteRecursive(node.getLeft(), key)));
                 node = balance(copyNode(node)); //rebalance tree from this node
-                return node;
             }
         }
         //if the key is still greater than the node we are at...
@@ -106,12 +162,19 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
                 //keep looking but to the right of this node
                 node.setRight(copyNode(deleteRecursive(node.getRight(), key)));
                 node = balance(copyNode(node)); //rebalance tree from this node
-                return node;
             }
         }
         return node; //return the regular node if all else fails (failsafe, most likely won't be reached).
     }
-    
+
+    /** 
+     * Returns the depth of the root of this tree.
+     * @return the depth of the tree in integer form.
+     */
+    public int depth() {
+        return postorder_depth(root, 0); //calls the recursive method.
+    }
+
     /**
      * Finds the minimum value from a particular node.
      * This simply involves traversing the left-most nodes
@@ -121,21 +184,14 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
      * @return the node which contains the minimum value (the left most leaf)
      */
     public AVLNode<E, K> findMin(AVLNode<E, K> node) {
+    	//continually gets the leftmost node until it can't any longer.
         while(node.getLeft() != null) {
             node = node.getLeft();
         }
         return node;
     }
-
-    /** 
-     * Returns the depth of the root of this tree.
-     * @return the depth of the tree in integer form.
-     */
-    public int depth() {
-        return postorder_depth(root, 0);
-    }
-
-    /** 
+    
+	/** 
      * This is a recursive solution to printing out the tree
      * in the order of "inorder" processing.
      * @param node the node we are traversing from
@@ -143,21 +199,12 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
     public void inorder(AVLNode<E,K> node) {
         if(node != null) {
             inorder(node.getLeft()); //get the left keys first
-            System.out.println("key: " + node.getKey().toString() + " element: " + node.getElement().toString() + " balance: " + node.getBalance());
-            if(node.getLeft() != null) {
-            	System.out.println("left of " + node.getKey() + " is " + node.getLeft().getKey() + " with balance = " + node.getLeft().getBalance());
-            }
-            else System.out.println("left of " + node.getKey() + " is null");
-            
-            if(node.getRight() != null) {
-            	System.out.println("right of " + node.getKey() + " is " + node.getRight().getKey() + " with balance = " + node.getRight().getBalance());
-            }
-            else System.out.println("right of " + node.getKey() + " is null");
+            System.out.println("key: " + node.getKey().toString() + " element: " + node.getElement().toString());
             inorder(node.getRight()); //thing get the right keys.
         }
     }
-
-    /** 
+	
+	/** 
      * Insert a key-value pair into the AVL tree.
      * Uses the recursive solution as a helper method.
      */
@@ -165,16 +212,15 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
         // there are no items yet in the AVL tree
         if(root == null) {
             root = new AVLNode<E, K>(key, element, null, null, BALANCED);
-            if(debugging) System.out.println("root set as " + key);
         }
         // there are items in the AVL tree
         // so we must find where to put the item. (by key)
         else {
-            root = insertBelow(root, key, element);
+            root = copyNode(insertBelow(root, key, element));
         }
     }
 
-    /**
+	/**
      * A recursive solution to inserting a node below a specific node.
      * 
      * @param node the node we wish to insert our new node underneath
@@ -195,9 +241,10 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
     			node.setLeft(new AVLNode<E, K>(key, element, null, null, 2));
     		}
     		else {
-    			//insert it into this node
+    			//insert it into this node (recursive part)
     			node.setLeft(copyNode(insertBelow(copyNode(node.getLeft()), key, element)));
     		}
+    		//set the new balance to be more left
     		node.setBalance(node.getBalance()-1);
     	}
     	else if(key.compareTo(node.getKey()) > 0) {
@@ -207,142 +254,16 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
     			node.setRight(new AVLNode<E, K>(key, element, null, null, 2));
     		}
     		else {
+    			//recursive part
     			node.setRight(copyNode(insertBelow(copyNode(node.getRight()), key, element)));
     		}
+    		//set the new balance to be more right
     		node.setBalance(node.getBalance()+1);
     	}
-    	node = balance(node);
-    	return node;
+    	return copyNode(balance(node));
 }
-    
-	/**
-	 * Balances the node using rotations if required.
-	 * Returns the balanced node.
-	 */
-	public AVLNode<E, K> balance(AVLNode<E, K> node) {
-		int balanceFactor = node.getBalance();
-		if(balanceFactor > MORERIGHT) {
-			//need to do a right rotate
-			AVLNode<E, K> rightNode = copyNode(node.getRight());
-			if(rightNode == null) return node;
-			if(rightNode.getBalance() == MORELEFT) {
-				//right-left rotate
-				node = rotateRIGHTLEFT(copyNode(node));
-				node = rotateRIGHTRIGHT(copyNode(node));
-				node.setBalance(2);
-			}
-			else if (rightNode.getBalance() >= MORERIGHT){
-				//right-right rotate
-				node = rotateRIGHTRIGHT(copyNode(node));
-				node.setBalance(2);
-			}
-		}
-		else if(balanceFactor < MORELEFT) {
-			//need to do a left rotate
-			AVLNode<E, K> leftNode = copyNode(node.getLeft());
-			if(leftNode == null) return node;
-			if (leftNode.getBalance() == MORERIGHT) {
-				//left-right rotate
-				node = rotateLEFTRIGHT(copyNode(node));
-				node = rotateLEFTLEFT(copyNode(node));
-				node.setBalance(2);
-			}
-			else if(leftNode.getBalance() <= MORELEFT) {
-				//left-left rotate
-				node = rotateLEFTLEFT(copyNode(node));
-				node.setBalance(2);
-			}
-		}
-		return copyNode(node);
-	}
-	
-	/** 
-	 * Rotate method for the LEFT-LEFT case.
-	 * 
-	 * @param node the node which we need to perform the rotate on.
-	 * @return a new rotated node.
-	 */
-	public AVLNode<E, K> rotateLEFTLEFT(AVLNode<E, K> node) {
-		AVLNode<E, K> newCenter = copyNode(node.getLeft());
-		AVLNode<E, K> newRight = copyNode(node);
-		newRight.setLeft(copyNode(newCenter.getRight()));
-		newRight.setBalance(2);
-		newCenter.setRight(copyNode(newRight));
-		newCenter.setBalance(2);
-		return newCenter;
-	}
 
 	/** 
-	* Rotate method for the LEFT-RIGHT case.
-	* 
-	* @param node the node which we need to perform the rotate on.
-	* @return a new rotated node.
-	*/
-	public AVLNode<E, K> rotateLEFTRIGHT(AVLNode<E, K> node) {
-		AVLNode<E, K> newTop = copyNode(node);
-		AVLNode<E, K> newCenter = copyNode(node.getLeft().getRight());
-		AVLNode<E, K> newBottom = copyNode(node.getLeft());
-		if(newCenter == null) return node;
-		newBottom.setRight(copyNode(newCenter.getLeft()));
-		newBottom.setBalance(2);
-		newCenter.setLeft(copyNode(newBottom));
-		newCenter.setBalance(1);
-		newTop.setLeft(copyNode(newCenter));
-		newTop.setBalance(0);
-		return newTop;
-	}
-
-	/**
-	 * Rotate method for the RIGHTRIGHT case.
-	 * 
-	 * @param node the node which we need to perform the rotate on.
-	 * @return a new rotated node.
-	 */
-	public AVLNode<E, K> rotateRIGHTRIGHT(AVLNode<E, K> node) {
-		AVLNode<E, K> newCenter = copyNode(node.getRight());
-		AVLNode<E, K> newLeft = copyNode(node);
-		if(newCenter == null) return node;
-		newLeft.setRight(copyNode(newCenter.getLeft()));
-		newLeft.setBalance(2);
-		newCenter.setLeft(copyNode(newLeft));
-		newCenter.setBalance(2);
-		return newCenter;
-	}
-	
-	/** 
-	 * Rotate method for the RIGHT-LEFT case.
-	 * 
-	 * @param node the node which we need to perform the rotate on.
-	 * @return a new rotated node.
-	 */
-	public AVLNode<E, K> rotateRIGHTLEFT(AVLNode<E, K> node) {
-		AVLNode<E, K> newTop = copyNode(node);
-		AVLNode<E, K> newCenter = copyNode(node.getRight().getLeft());
-		AVLNode<E, K> newBottom = copyNode(node.getRight());
-		if(newCenter == null) return node;
-		newBottom.setLeft(copyNode(newCenter.getRight()));
-		newBottom.setBalance(2);
-		newCenter.setRight(copyNode(newBottom));
-		newCenter.setBalance(3);
-		newTop.setRight(copyNode(newCenter));
-		newTop.setBalance(4);
-		return newTop;
-	}
-	    
-	/**
-	 * Copies a node to a new node.
-	 * 
-	 * @param node the node to copy
-	 * @return the copied node.
-	 */
-	public AVLNode<E, K> copyNode(AVLNode<E, K>  node) {
-	    if(node != null) {
-	        return new AVLNode<E, K>(node.getKey(), node.getElement(), node.getLeft(), node.getRight(), node.getBalance());
-	    }
-	    else return null;
-	}
-
-    /** 
      * Recursive counter to count the depth of the tree's node.
      * 
      * @param node the node we are starting to calculate the depth from
@@ -356,25 +277,99 @@ public class AVLDictionary<E, K extends Sortable> implements Dictionary<E, K> {
         }
         else return current_depth;
     }
-    
-    /**
-     * Recursively counts the depth of the tree.
-     */
-    int depth_recurse(AVLNode<E, K> node) {
-    	if(node != null) {
-    		return Math.max(depth_recurse(node.getRight()), depth_recurse(node.getLeft())) + 1;
-    	}
-    	else return 0;
-    }
-
-    /**
+	
+	/**
      * Print the Dictionary in sorted order (as determined by the keys)
      * to print in sorted order, we traverse and print the tree "inorder".
      */
     public void printTree() {
-        System.out.println("Printing the AVL Tree below...");
+        System.out.println("\nPrinting the AVL Tree below...");
         inorder(root);
     }
+	    
+	/** 
+	 * Rotate method for the LEFT-LEFT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateLEFTLEFT(AVLNode<E, K> node) {
+		//get the new nodes (as copies) to modify and rotate.
+		AVLNode<E, K> newCenter = copyNode(node.getLeft()); //new center node
+		AVLNode<E, K> newRight = copyNode(node); //new right node to center node
+		//this rotates the new nodes around so that they
+		//reflect the new arrangement which is more sorted.
+		newRight.setLeft(copyNode(newCenter.getRight()));
+		newRight.setBalance(2); //set it to be balanced.
+		newCenter.setRight(copyNode(newRight)); //set the new right.
+		newCenter.setBalance(2); //set it to be balanced.
+		return newCenter; //return the newly rotated subtree
+	}
+
+    /** 
+	* Rotate method for the LEFT-RIGHT case.
+	* 
+	* @param node the node which we need to perform the rotate on.
+	* @return a new rotated node.
+	*/
+	public AVLNode<E, K> rotateLEFTRIGHT(AVLNode<E, K> node) {
+		//get the new nodes (as copies) to modify and rotate.
+		AVLNode<E, K> newTop = copyNode(node);
+		AVLNode<E, K> newCenter = copyNode(node.getLeft().getRight());
+		AVLNode<E, K> newBottom = copyNode(node.getLeft());
+		//this rotates the new nodes around so that they
+		//reflect the new arrangement which is more sorted.
+		if(newCenter == null) return node;
+		newBottom.setRight(copyNode(newCenter.getLeft()));
+		newBottom.setBalance(2); //set it to be balanced.
+		newCenter.setLeft(copyNode(newBottom));
+		newCenter.setBalance(1); //set it to be more left
+		newTop.setLeft(copyNode(newCenter));
+		newTop.setBalance(0); //extra more left
+		return newTop; //return the newly rotated subtree
+	}
+    
+    /** 
+	 * Rotate method for the RIGHT-LEFT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateRIGHTLEFT(AVLNode<E, K> node) {
+		AVLNode<E, K> newTop = copyNode(node);
+		AVLNode<E, K> newCenter = copyNode(node.getRight().getLeft());
+		AVLNode<E, K> newBottom = copyNode(node.getRight());
+		//this rotates the new nodes around so that they
+		//reflect the new arrangement which is more sorted.
+		if(newCenter == null) return node; //make sure this isn't null
+		newBottom.setLeft(copyNode(newCenter.getRight()));
+		newBottom.setBalance(2); //set to balanced
+		newCenter.setRight(copyNode(newBottom));
+		newCenter.setBalance(3); //more right
+		newTop.setRight(copyNode(newCenter)); //set the new right
+		newTop.setBalance(4); // extra extra right
+		return newTop; //return the newly rotated subtree
+	}
+
+    /**
+	 * Rotate method for the RIGHTRIGHT case.
+	 * 
+	 * @param node the node which we need to perform the rotate on.
+	 * @return a new rotated node.
+	 */
+	public AVLNode<E, K> rotateRIGHTRIGHT(AVLNode<E, K> node) {
+		//get the new nodes (as copies) to modify and rotate.
+		AVLNode<E, K> newCenter = copyNode(node.getRight());
+		AVLNode<E, K> newLeft = copyNode(node);
+		//this rotates the new nodes around so that they
+		//reflect the new arrangement which is more sorted.
+		if(newCenter == null) return node; //make sure its not null
+		newLeft.setRight(copyNode(newCenter.getLeft()));
+		newLeft.setBalance(2); //set to balanced
+		newCenter.setLeft(copyNode(newLeft)); 
+		newCenter.setBalance(2); //set to balanced
+		return newCenter; //return the newly rotated subtree
+	}
 
     /**
      * Returns the element of the node with the key value
